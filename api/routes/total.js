@@ -4,15 +4,39 @@ const mongoose= require('mongoose');
 const Product = require('../models/product');
 
 router.get("/", (req,res,next) => {
+    var Stotal=[];
+    var names=["a"];
     Product.find()
     .exec()
     .then(docs =>{
+        
+        var Pname="";
         var Tprice=0;
         for(var i=0;i<docs.length;i++){
-            Tprice=parseFloat(docs[i]["price"])+Tprice;
+            
+
+            if (!names.includes(docs[i]["name"])){
+                var Pname = docs[i]["name"];
+
+                for(var j=0;j<docs.length;j++){
+                    if(Pname == docs[j]["name"]){
+                    Tprice=parseFloat(docs[j]["price"])+Tprice;
+                    }
+                }
+                const products = new Product({
+                    _id: new mongoose.Types.ObjectId(),
+                    name:Pname,
+                    price:Tprice
+                });
+                names.push(Pname);
+                Stotal.push(products);
+                Tprice=0;
+                }
+        
+        
         }
-        console.log(docs);
-        res.status(200).json(Tprice);
+        console.log(Stotal);
+        res.status(200).json(Stotal);
     })
     .catch(err =>{
         console.log(err);
@@ -21,7 +45,6 @@ router.get("/", (req,res,next) => {
         });
     });
 });
-
 router.get("/:byname", (req,res,next) => {
     Product.find()
     .exec()
@@ -41,4 +64,6 @@ router.get("/:byname", (req,res,next) => {
         });
     });
 });
+
+
 module.exports = router;
